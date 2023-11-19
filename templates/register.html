@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login Page</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Custom styles -->
+    
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center login-container">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>Login</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.csrf_token }}
+                        <div class="form-group">
+                            {{ form.username.label() }}
+                            {{ form.username(class="form-control", placeholder="User Name") }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.email.label() }}
+                            {{ form.email(class="form-control", placeholder="Enter Email address") }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.password1.label() }}
+                            {{ form.password1(class="form-control", placeholder="Create Password") }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.password2.label() }}
+                            {{ form.password2(class="form-control", placeholder="Confirm Password") }}
+                        </div>
+                        {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+                        <div class="btn-lg">
+                            <h6>Already have an account?</h6>
+                            <a class="btn btn-lg btn-block btn-primary" href="{{ url_for('login_page') }}">Log In</a>
+                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>
