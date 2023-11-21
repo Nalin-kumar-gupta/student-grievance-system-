@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="mb-4">All Messages</h1>
+
+                {% if messages %}
+                    <ul class="list-group">
+                        {% for message in messages %}
+                            <li class="list-group-item">
+                                <strong>{{ message.user.username }}</strong>: {{ message.message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No messages available.</p>
+                {% endif %}
+
+                <p><a href="{{ url_for('index') }}">Back to Home</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

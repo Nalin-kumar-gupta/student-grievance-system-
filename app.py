@@ -2,15 +2,16 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user, UserMixin, LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
-from wtforms import StringField, PasswordField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField
 from flask_wtf import FlaskForm
 from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError
-
+from flask_socketio import SocketIO, send
 
 db = SQLAlchemy()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///studentapp.db'
 app.config['SECRET_KEY'] = 'abdf855db1a2a15facf7d62c'
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -29,7 +30,12 @@ class User(db.Model, UserMixin):
             raise ValueError("Email must end with @pec.edu.in") #Frontend display
         return email
     
-
+class Message(db.Model, UserMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    message=db.Column(db.String(length=500), unique=True, nullable=False)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('messages', lazy=True))
+    
 class LoginForm(FlaskForm):
     username = StringField(label='User Name:', validators=[DataRequired()])
     password = PasswordField(label='Password:', validators=[DataRequired()])
@@ -54,15 +60,24 @@ class RegisterForm(FlaskForm):
     password2 = PasswordField(label='Confirm password', validators=[EqualTo('password1'), DataRequired()])
     submit = SubmitField(label='Create Account')
 
+class MessageForm(FlaskForm):
+    message_content = TextAreaField('Message', validators=[DataRequired()])
+    submit = SubmitField('Send Message')
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
     
+@socketio.on('message')
+def handle_message(message):
+    print("Received message: " + message)
+    if message != "User connected!":
+        send(message, broadcast=True)
 
 @app.route("/")
-def home_page():
-    return render_template("base.html")
+def index():
+    return render_template("index.html")
 
 @app.route("/users")
 def user_list():
@@ -120,3 +135,30 @@ def user_delete(id):
         return redirect(url_for("user_list"))
 
     return render_template("user/delete.html", user=user)
+
+
+@app.route('/send-message', methods=['GET', 'POST'])
+def send_message():
+    form = MessageForm()
+
+    if form.validate_on_submit():
+        message_content = form.message_content.data
+
+        # Create a new message and associate it with the current user
+        new_message = Message(message=message_content, user=current_user)
+        db.session.add(new_message)
+        db.session.commit()
+
+        return redirect(url_for('send_message'))  # Redirect to the same page after submission to clear the form
+
+    return render_template('send_message.html', form=form)
+
+@app.route('/all-messages')
+# @login_required
+def all_messages():
+    messages = Message.query.all()
+    return render_template('all_messages.html', messages=messages)
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)

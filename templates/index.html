@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student App</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"
+      integrity="sha512-zoJXRvW2gC8Z0Xo3lBbao5+AS3g6YWr5ztKqaicua11xHo+AvE1b0lT9ODgrHTmNUxeCw0Ry4BGRYZfXu70weg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <div id="messages"></div>
+
+    <input type="text" id="username" placeholder="Username" />
+    <input type="text" id="message" placeholder="Message" />
+    <button id="sendBtn">Send</button>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        var socket = io.connect("http://localhost:5000/"); // Corrected the syntax
+
+        socket.on('connect', function () {
+          socket.send("user connected");
+        });
+
+        socket.on('message', function (data) {
+          $('#messages').append($('<p>').text(data));
+        });
+
+        $('#sendBtn').on('click', function () {
+          socket.send($('#username').val() + ': ' + $('#message').val()); // Corrected the concatenation
+          $('#message').val('');
+        });
+      });
+    </script>
+  </body>
+</html>
